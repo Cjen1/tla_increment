@@ -1,4 +1,4 @@
----- MODULE increment1 ----
+---- MODULE increment_1 ----
 
 EXTENDS Integers
 
