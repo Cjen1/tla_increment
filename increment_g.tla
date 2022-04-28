@@ -1,6 +1,6 @@
 ---- MODULE increment_g ----
 
-EXTENDS Integers
+EXTENDS Integers, FiniteSets, TLC
 
 (*
  * 1: t = i;
@@ -11,44 +11,43 @@ EXTENDS Integers
 
 VARIABLES i, ts, pcs
 
-N == 2
+CONSTANTS Procs
+Symmetry == Permutations({}) \* No Symmetry, process id matters
+\*Symmetry == Permutations(Procs) \* Symmetry, process id doesn't matters
 
 Init == 
   /\ i = 0
-  /\ ts = [n \in 1..N |-> -1]
-  /\ pcs = [n \in 1..N |-> 1]
+  /\ ts = [n \in Procs |-> -1]
+  /\ pcs = [n \in Procs |-> 1]
 
-read(n) ==
-  /\ pcs[n] = 1
-  /\ ts' = [ts EXCEPT![n] = i]
-  /\ pcs' = [pcs EXCEPT ![n] = 2]
+read(p) ==
+  /\ pcs[p] = 1
+  /\ ts' = [ts EXCEPT![p] = i]
+  /\ pcs' = [pcs EXCEPT ![p] = 2]
   /\ i' = i
 
-write(n) ==
-  /\ pcs[n] = 2
-  /\ i' = ts[n] + 1
-  /\ pcs' = [pcs EXCEPT ![n] = 3]
+write(p) ==
+  /\ pcs[p] = 2
+  /\ i' = ts[p] + 1
+  /\ pcs' = [pcs EXCEPT ![p] = 3]
   /\ ts' = ts
 
-fin(n) ==
-  /\ pcs[n] = 3
+fin(p) ==
+  /\ pcs[p] = 3
   /\ i' = i
   /\ ts' = ts
   /\ pcs' = pcs
 
-Next == \E n \in 1..N: read(n) \/ write(n) \/ fin(n)
+Next == \E p \in Procs: read(p) \/ write(p) \/ fin(p)
 
 vars == << i, ts, pcs >>
 
-\*Spec == Init /\ [][Next]_vars
-
-
-Spec == Init /\ [][Next]_vars /\ \A n \in 1..N: /\ WF_vars(read(n))
-                                                /\ WF_vars(write(n))
-						/\ WF_vars(fin(n))
+Spec == Init /\ [][Next]_vars /\ \A p \in Procs: /\ WF_vars(read(p))
+                                                 /\ WF_vars(write(p))
+						 /\ WF_vars(fin(p))
 
 Properties == 
-  /\ <>[](\A n \in 1..N: pcs[n] = 3)
-  /\ <>[](i = N)
+  /\ <>[](\A p \in Procs: pcs[p] = 3)
+  /\ <>[](i = Cardinality(Procs))
 
 ====

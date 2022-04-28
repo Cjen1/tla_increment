@@ -2,11 +2,11 @@
 
 EXTENDS Integers
 
-(*
+(* 0: lock
  * 1: t = i;
  * 2: i = t + 1;
- * 3: Fin
- *
+ * 3: unlock
+ * 4: fin
  *)
 
 VARIABLES i, t1, pc1, t2, pc2, lock
@@ -85,8 +85,6 @@ Next ==
   \/ lock2 \/ read2 \/ write2 \/ unlock2 \/ fin2
 
 vars == << i, t1, pc1, t2, pc2, lock >>
-
-\*Spec == Init /\ [][Next]_vars
 
 Spec == Init /\ [][Next]_vars /\ WF_vars(read1) /\ WF_vars(write1) /\ WF_vars(lock1) /\ WF_vars(unlock1)
                               /\ WF_vars(read2) /\ WF_vars(write2) /\ WF_vars(lock2) /\ WF_vars(unlock2)

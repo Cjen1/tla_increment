@@ -57,12 +57,10 @@ Next ==
 
 vars == << i, t1, pc1, t2, pc2 >>
 
-\*Spec == Init /\ [][Next]_vars
-
-Spec == Init /\ [][Next]_vars /\ WF_vars(read1) /\ WF_vars(write1)
-                              /\ WF_vars(read2) /\ WF_vars(write2)
+Spec == Init /\ [][Next]_vars /\ WF_vars(read1) /\ WF_vars(write1) /\ WF_vars(fin1)
+                              /\ WF_vars(read2) /\ WF_vars(write2) /\ WF_vars(fin2)
 
 Properties == 
-  /\ <>[](pc1 = 3 /\ pc2 = 3)
+  /\ <>[](pc1 = 3 /\ pc2 = 3) \* Eventually it finishes
   /\ <>[](i = 2)
 ====

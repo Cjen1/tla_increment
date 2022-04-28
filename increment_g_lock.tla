@@ -1,74 +1,72 @@
 ---- MODULE increment_g_lock ----
 
-EXTENDS Integers
+EXTENDS Integers, FiniteSets, TLC
 
-(*
+(* 0: lock
  * 1: t = i;
  * 2: i = t + 1;
- * 3: Fin
- *
+ * 3: unlock
+ * 4: fin
  *)
 
 VARIABLES i, ts, pcs, lock
 
-N == 2
+CONSTANTS Procs
+Symmetry == Permutations({}) \* No Symmetry, process id matters
+\*Symmetry == Permutations(Procs) \* Symmetry, process id doesn't matters
 
 Init == 
   /\ i = 0
-  /\ ts = [n \in 1..N |-> -1]
-  /\ pcs = [n \in 1..N |-> 0]
+  /\ ts = [p \in Procs |-> -1]
+  /\ pcs = [p \in Procs |-> 0]
   /\ lock = FALSE
 
-lock_lock(n) ==
-  /\ pcs[n] = 0
+lock_lock(p) ==
+  /\ pcs[p] = 0
   /\ ~lock
   /\ lock' = TRUE
-  /\ pcs' = [pcs EXCEPT ![n] = 1]
+  /\ pcs' = [pcs EXCEPT ![p] = 1]
   /\ UNCHANGED << i, ts >>
 
-read(n) ==
-  /\ pcs[n] = 1
-  /\ ts' = [ts EXCEPT![n] = i]
-  /\ pcs' = [pcs EXCEPT ![n] = 2]
+read(p) ==
+  /\ pcs[p] = 1
+  /\ ts' = [ts EXCEPT![p] = i]
+  /\ pcs' = [pcs EXCEPT ![p] = 2]
   /\ i' = i
   /\ lock' = lock
 
-write(n) ==
-  /\ pcs[n] = 2
-  /\ i' = ts[n] + 1
-  /\ pcs' = [pcs EXCEPT ![n] = 3]
+write(p) ==
+  /\ pcs[p] = 2
+  /\ i' = ts[p] + 1
+  /\ pcs' = [pcs EXCEPT ![p] = 3]
   /\ ts' = ts
   /\ lock' = lock
 
-unlock(n) ==
-  /\ pcs[n] = 3
+unlock(p) ==
+  /\ pcs[p] = 3
   /\ lock' = FALSE
-  /\ pcs' = [pcs EXCEPT ![n] = 4]
+  /\ pcs' = [pcs EXCEPT ![p] = 4]
   /\ UNCHANGED << i, ts >>
 
-fin(n) ==
-  /\ pcs[n] = 4
+fin(p) ==
+  /\ pcs[p] = 4
   /\ i' = i
   /\ ts' = ts
   /\ pcs' = pcs
   /\ lock' = lock
 
-Next == \E n \in 1..N: read(n) \/ write(n) \/ fin(n) \/ lock_lock(n) \/ unlock(n)
+Next == \E p \in Procs: read(p) \/ write(p) \/ fin(p) \/ lock_lock(p) \/ unlock(p)
 
-vars == << i, ts, pcs >>
+vars == << i, ts, pcs, lock>>
 
-\*Spec == Init /\ [][Next]_vars
-
-
-Spec == Init /\ [][Next]_vars /\ \A n \in 1..N: /\ WF_vars(read(n))
-                                                /\ WF_vars(write(n))
-						/\ WF_vars(lock_lock(n))
-						/\ WF_vars(unlock(n))
-						/\ WF_vars(fin(n))
-
+Spec == Init /\ [][Next]_vars /\ \A p \in Procs: /\ WF_vars(read(p))
+                                                 /\ WF_vars(write(p))
+						 /\ WF_vars(lock_lock(p))
+						 /\ WF_vars(unlock(p))
+						 /\ WF_vars(fin(p))
 
 Properties == 
-  /\ <>[](\A n \in 1..N: pcs[n] = 4)
-  /\ <>[](i = N)
+  /\ <>[](\A p \in Procs: pcs[p] = 4)
+  /\ <>[](i = Cardinality(Procs))
 
 ====

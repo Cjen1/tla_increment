@@ -38,11 +38,10 @@ Next == \/ read \/ write \/ fin
 
 vars == << i, t, pc >>
 
-\*Spec == Init /\ [][Next]_vars
+Spec == Init /\ [][Next]_vars
 
-
-Spec == Init /\ [][Next]_vars /\ WF_vars(read)
-                             /\ WF_vars(write)
+\*Spec == Init /\ [][Next]_vars /\ WF_vars(read)
+\*                              /\ WF_vars(write)
 
 Invariants ==
   /\ i >= 0
